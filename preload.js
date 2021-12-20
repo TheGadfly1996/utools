@@ -9,7 +9,9 @@ window.exports = {
 			// 子输入框内容变化时被调用
 			search: (action, searchWord, callbackSetList) => {
 				if (!searchWord) return callbackSetList([])
-				const myData = JSON.parse(readFileSync(path.join(__dirname, './idiom.json'), 'utf-8'))
+				const myData = JSON.parse(
+					readFileSync(path.join(__dirname, '/json-data/idiom.json'), 'utf-8'),
+				)
 				const idiomResult = []
 				for (let i = 0; i < myData.length; i++) {
 					let temp = myData[i]
@@ -22,7 +24,7 @@ window.exports = {
 					return {
 						title: item.word,
 						description: `${item.pinyin} ${item.explanation}`,
-						icon: '芒种.png', // 图标
+						icon: '/images/Mang.png', // 图标
 						url: `https://www.zdic.net/hans/${item.word}`,
 					}
 				})
@@ -48,7 +50,9 @@ window.exports = {
 				const poetryStatus = ['唐诗三百首', '宋词三百首', '教科书']
 
 				poetryStatus.forEach((item) => {
-					myData = JSON.parse(readFileSync(path.join(__dirname, `./${item}.json`), 'utf-8'))
+					myData = JSON.parse(
+						readFileSync(path.join(__dirname, `/json-data/${item}.json`), 'utf-8'),
+					)
 				})
 				// 匹配结果
 				for (let i = 0; i < myData.length; i++) {
@@ -76,7 +80,7 @@ window.exports = {
 					return {
 						title: `${item.title} ${item.author}`,
 						description: item.paragraphs,
-						icon: '冬.png', // 图标
+						icon: '/images/winter.png', // 图标
 						url: `https://so.gushiwen.cn/search.aspx?value=${item.title}`,
 					}
 				})
