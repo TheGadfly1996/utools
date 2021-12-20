@@ -1,0 +1,26 @@
+{
+	"logo": "立秋.png",
+	"preload": "preload.js",
+	"features": [
+		{
+			"code": "idiom",
+			"explain": "大丈夫生于乱世,当带三尺剑立不世之功",
+			"icon": "成语.png",
+			"cmds": [
+				"成语",
+				"成语查询"
+			]
+		},
+		{
+			"code": "poetry",
+			"explain": "唤起一天明月，照我满怀冰雪，浩荡百川流。",
+			"icon": "古诗.png",
+			"cmds": [
+				"诗词",
+				"诗词查询",
+				"诗词",
+				"古诗"
+			]
+		}
+	]
+}
