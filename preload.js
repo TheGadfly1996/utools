@@ -1,5 +1,6 @@
 const { readFileSync } = require('fs')
 const path = require('path')
+
 window.exports = {
 	idiom: {
 		mode: 'list',
@@ -32,8 +33,8 @@ window.exports = {
 			},
 			// 用户选择列表中某个条目时被调用
 			select: (action, itemData, callbackSetList) => {
-				window.utools.hideMainWindow()
-				utools.shellOpenExternal(itemData.url)
+				utools.copyText(itemData.title)
+				utools.showNotification('复制成功')
 			},
 			// 子输入框为空时的占位符，默认为字符串"搜索"
 			placeholder: '请输入成语',
@@ -81,7 +82,9 @@ window.exports = {
 						title: `${item.title} ${item.author}`,
 						description: item.paragraphs,
 						icon: '/images/winter.png', // 图标
-						url: `https://so.gushiwen.cn/search.aspx?value=${item.title}`,
+						url: `https://so.gushiwen.cn/search.aspx?value=${
+							item.title
+						}&valuej=${item.title.substring(0, 1)}`,
 					}
 				})
 				return callbackSetList(result)
@@ -89,7 +92,8 @@ window.exports = {
 			// 用户选择列表中某个条目时被调用
 			select: (action, itemData, callbackSetList) => {
 				window.utools.hideMainWindow()
-				utools.shellOpenExternal(itemData.url)
+				utools.ubrowser.goto(itemData.url).value('李白').click('#sb_form_go').run()
+				// utools.shellOpenExternal(itemData.url)
 			},
 			placeholder: '输入关键字作者或标题',
 		},
