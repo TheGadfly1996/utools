@@ -34,7 +34,7 @@ window.exports = {
 			// 用户选择列表中某个条目时被调用
 			select: (action, itemData, callbackSetList) => {
 				utools.copyText(itemData.title)
-				utools.showNotification('复制成功')
+				utools.showNotification(`${itemData.title}复制成功`)
 			},
 			// 子输入框为空时的占位符，默认为字符串"搜索"
 			placeholder: '请输入成语',
@@ -92,7 +92,7 @@ window.exports = {
 			// 用户选择列表中某个条目时被调用
 			select: (action, itemData, callbackSetList) => {
 				window.utools.hideMainWindow()
-				utools.ubrowser.goto(itemData.url).value('李白').click('#sb_form_go').run()
+				utools.ubrowser.goto(itemData.url).value(itemData.title).click('#sb_form_go').run()
 				// utools.shellOpenExternal(itemData.url)
 			},
 			placeholder: '输入关键字作者或标题',
