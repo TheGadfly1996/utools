@@ -1,4 +1,4 @@
-const { readFileSync } = require('fs')
+const { readFileSync, readdirSync } = require('fs')
 const path = require('path')
 
 window.exports = {
@@ -10,9 +10,7 @@ window.exports = {
 			// 子输入框内容变化时被调用
 			search: (action, searchWord, callbackSetList) => {
 				if (!searchWord) return callbackSetList([])
-				const myData = JSON.parse(
-					readFileSync(path.join(__dirname, '/json-data/idiom.json'), 'utf-8'),
-				)
+				const myData = JSON.parse(readFileSync(path.join(__dirname, '/json-data/idiom.json'), 'utf-8'))
 				const idiomResult = []
 				for (let i = 0; i < myData.length; i++) {
 					let temp = myData[i]
@@ -47,19 +45,25 @@ window.exports = {
 			search: (action, searchWord, callbackSetList) => {
 				if (!searchWord) return callbackSetList([])
 				let myData = []
-				const poetryResult = []
-				const poetryStatus = ['唐诗三百首', '宋词三百首', '教科书']
+				let poetryResult = []
 
-				poetryStatus.forEach((item) => {
-					myData = JSON.parse(
-						readFileSync(path.join(__dirname, `/json-data/${item}.json`), 'utf-8'),
-					)
+				// 指定要读取的目录路径
+				const directoryPath = path.join(__dirname, '/json-data')
+				const files = readdirSync(directoryPath)
+
+				// 遍历所有文件
+				files.forEach((file) => {
+					if (file === 'idiom.json') return
+					const filePath = path.join(directoryPath, file)
+					const fileContent = readFileSync(filePath, 'utf-8')
+					myData.push(...JSON.parse(fileContent))
 				})
+
 				// 匹配结果
 				for (let i = 0; i < myData.length; i++) {
 					let temp = myData[i]
 					let paragraphs = temp.paragraphs
-					if (temp.author.includes(searchWord) || temp.title.includes(searchWord)) {
+					if (temp?.author?.includes(searchWord) || temp.title.includes(searchWord)) {
 						poetryResult.push(temp)
 					}
 					for (let j = 0; j < paragraphs.length; j++) {
@@ -69,22 +73,26 @@ window.exports = {
 					}
 				}
 				// 去重
-				for (var i = 0; i < poetryResult.length - 1; i++) {
-					for (var j = i + 1; j < poetryResult.length; j++) {
-						if (poetryResult[i].paragraphs.join() === poetryResult[j].paragraphs.join()) {
-							poetryResult.splice(j, 1)
-							j--
+				function uniqueObjects(arr, getKey) {
+					const map = new Map()
+					const uniqueArr = []
+					arr.forEach((item) => {
+						const key = getKey ? getKey(item) : JSON.stringify(item)
+						if (!map.has(key)) {
+							map.set(key, item)
+							uniqueArr.push(item)
 						}
-					}
+					})
+					return uniqueArr
 				}
+				poetryResult = uniqueObjects(poetryResult, (item) => item.paragraphs[0])
+
 				let result = poetryResult.map((item) => {
 					return {
 						title: `${item.title} ${item.author}`,
 						description: item.paragraphs,
 						icon: '/images/winter.png', // 图标
-						url: `https://so.gushiwen.cn/search.aspx?value=${
-							item.title
-						}&valuej=${item.title.substring(0, 1)}`,
+						url: `https://so.gushiwen.cn/search.aspx?value=${item.title}&valuej=${item.title.substring(0, 1)}`,
 					}
 				})
 				return callbackSetList(result)
