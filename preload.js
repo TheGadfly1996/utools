@@ -70,8 +70,7 @@ window.exports = {
 			// 用户选择列表中某个条目时被调用
 			select: (action, itemData, callbackSetList) => {
 				window.utools.hideMainWindow()
-				utools.ubrowser.goto(itemData.url).value(itemData.title).click('#sb_form_go').run()
-				// utools.shellOpenExternal(itemData.url)
+				utools.ubrowser.goto(itemData.url).click('.sons a').run()
 			},
 			placeholder: '输入关键字作者或标题',
 		},

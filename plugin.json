@@ -1,5 +1,5 @@
 {
-	"logo": "/images/autumn.png",
+	"logo": "./images/autumn.png",
 	"preload": "preload.js",
 	"features": [
 		{
@@ -14,7 +14,7 @@
 		{
 			"code": "poetry",
 			"explain": "唤起一天明月，照我满怀冰雪，浩荡百川流。",
-			"icon": "/images/poetry.png",
+			"icon": "./images/poetry.png",
 			"cmds": [
 				"诗词",
 				"诗词查询",
@@ -24,7 +24,7 @@
 		{
 			"code": "daily",
 			"explain": "此曲只应天上有，人间能得几回闻。",
-			"icon": "/images/poetry.png",
+			"icon": "./images/daily.png",
 			"cmds": [
 				"每日诗词",
 				"每日古诗"
