@@ -1,6 +1,17 @@
 const { readFileSync, readdirSync } = require('fs')
 const path = require('path')
 
+// 添加一个通用的读取和解析 JSON 文件的函数
+const readJsonFile = (filePath) => {
+	try {
+		const data = readFileSync(filePath, 'utf-8')
+		return JSON.parse(data)
+	} catch (error) {
+		console.error(`Error reading or parsing JSON from ${filePath}:`, error)
+		return []
+	}
+}
+
 window.exports = {
 	idiom: {
 		mode: 'list',
@@ -10,23 +21,14 @@ window.exports = {
 			// 子输入框内容变化时被调用
 			search: (action, searchWord, callbackSetList) => {
 				if (!searchWord) return callbackSetList([])
-				const myData = JSON.parse(readFileSync(path.join(__dirname, '/json-data/idiom.json'), 'utf-8'))
-				const idiomResult = []
-				for (let i = 0; i < myData.length; i++) {
-					let temp = myData[i]
-					if (temp.word.includes(searchWord)) {
-						idiomResult.push(temp)
-					}
-				}
-				// 搜索结果
-				let result = idiomResult.map((item) => {
-					return {
-						title: item.word,
-						description: `${item.pinyin} ${item.explanation}`,
-						icon: '/images/Mang.png', // 图标
-						url: `https://www.zdic.net/hans/${item.word}`,
-					}
-				})
+				const myData = readJsonFile(path.join(__dirname, '/json-data/idiom.json'))
+				const idiomResult = myData.filter((item) => item.word.includes(searchWord))
+				let result = idiomResult.map((item) => ({
+					title: item.word,
+					description: `${item.pinyin} ${item.explanation}`,
+					icon: '/images/Mang.png',
+					url: `https://www.zdic.net/hans/${item.word}`,
+				}))
 				return callbackSetList(result)
 			},
 			// 用户选择列表中某个条目时被调用
@@ -43,58 +45,26 @@ window.exports = {
 		args: {
 			enter: () => {},
 			search: (action, searchWord, callbackSetList) => {
+				// ! 读取文件
 				if (!searchWord) return callbackSetList([])
-				let myData = []
-				let poetryResult = []
-
-				// 指定要读取的目录路径
 				const directoryPath = path.join(__dirname, '/json-data')
 				const files = readdirSync(directoryPath)
+				let myData = files
+					.filter((file) => file !== 'idiom.json')
+					.map((file) => readJsonFile(path.join(directoryPath, file)))
+					.flat()
 
-				// 遍历所有文件
-				files.forEach((file) => {
-					if (file === 'idiom.json') return
-					const filePath = path.join(directoryPath, file)
-					const fileContent = readFileSync(filePath, 'utf-8')
-					myData.push(...JSON.parse(fileContent))
-				})
+				// ! 过滤并去重
+				let poetryResult = myData.filter((item) => item.author.includes(searchWord) || item.title.includes(searchWord) || item.paragraphs.some((paragraph) => paragraph.includes(searchWord)))
+				poetryResult = [...new Map(poetryResult.map((item) => [`${item.title}-${item.author}`, item])).values()]
 
-				// 匹配结果
-				for (let i = 0; i < myData.length; i++) {
-					let temp = myData[i]
-					let paragraphs = temp.paragraphs
-					if (temp?.author?.includes(searchWord) || temp.title.includes(searchWord)) {
-						poetryResult.push(temp)
-					}
-					for (let j = 0; j < paragraphs.length; j++) {
-						if (paragraphs[j].includes(searchWord)) {
-							poetryResult.push(temp)
-						}
-					}
-				}
-				// 去重
-				function uniqueObjects(arr, getKey) {
-					const map = new Map()
-					const uniqueArr = []
-					arr.forEach((item) => {
-						const key = getKey ? getKey(item) : JSON.stringify(item)
-						if (!map.has(key)) {
-							map.set(key, item)
-							uniqueArr.push(item)
-						}
-					})
-					return uniqueArr
-				}
-				poetryResult = uniqueObjects(poetryResult, (item) => item.paragraphs[0])
-
-				let result = poetryResult.map((item) => {
-					return {
-						title: `${item.title} ${item.author}`,
-						description: item.paragraphs,
-						icon: '/images/winter.png', // 图标
-						url: `https://so.gushiwen.cn/search.aspx?value=${item.title}&valuej=${item.title.substring(0, 1)}`,
-					}
-				})
+				// ! 返回结果
+				let result = poetryResult.map((item) => ({
+					title: `${item.title} ${item.author}`,
+					description: item.paragraphs,
+					icon: '/images/winter.png',
+					url: `https://so.gushiwen.cn/search.aspx?value=${item.title}&valuej=${item.title.substring(0, 1)}`,
+				}))
 				return callbackSetList(result)
 			},
 			// 用户选择列表中某个条目时被调用
@@ -104,6 +74,29 @@ window.exports = {
 				// utools.shellOpenExternal(itemData.url)
 			},
 			placeholder: '输入关键字作者或标题',
+		},
+	},
+	daily: {
+		mode: 'list',
+		args: {
+			enter: () => {
+				// 随机诗词
+				const directoryPath = path.join(__dirname, '/json-data')
+				const files = readdirSync(directoryPath)
+				let myData = files
+					.filter((file) => file !== 'idiom.json')
+					.map((file) => readJsonFile(path.join(directoryPath, file)))
+					.flat()
+
+				let randomPoem = myData[Math.floor(Math.random() * myData.length)].title
+				if (randomPoem) {
+					utools.outPlugin()
+					utools.ubrowser
+						.goto(`https://so.gushiwen.cn/search.aspx?value=${randomPoem}&valuej=${randomPoem.substring(0, 1)}`)
+						.click('.sons a')
+						.run()
+				}
+			},
 		},
 	},
 }
